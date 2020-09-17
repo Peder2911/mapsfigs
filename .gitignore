@@ -1,0 +1,8 @@
+node_modules/
+venv/
+docs/*
+data/*
+!*.gitkeep
+!*manifest
+*.py[cod]
+__pycache__/
