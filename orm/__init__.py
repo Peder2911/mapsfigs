@@ -18,6 +18,9 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 def connect():
     return eng.connect()
 
+def get_session():
+    return sm()
+
 class Variable(Base):
     """
     A variable, associating values with mappings and a description
@@ -44,5 +47,3 @@ class Mapping(Base):
     def __repr__(self):
         print(f"Mapping 4 {self.variable.name}")
 
-def get_session():
-    return sm()
