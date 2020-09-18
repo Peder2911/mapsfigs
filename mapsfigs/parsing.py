@@ -14,9 +14,16 @@ import numpy as np
 
 import re
 
+KEEP = {
+        "p2_cod",
+        "p2_muni",
+        "PDET_name",
+    }
 
 fixedVname = lambda x: re.sub("(_AT|_FW)$","",x)
-stripPrefix = lambda x: re.sub("(_FW|_AT)$","",x)
+#stripPrefix = lambda x: re.sub("(_FW|_AT)$","",x)
+
+sqlcol = lambda x: re.sub("[^a-z_0-9]+","",x)
 
 def daneCode(v):
     try:
@@ -47,6 +54,7 @@ def getMergedCodebook(raw: pd.DataFrame)-> Dict[str,Dict[str,str]]:
         "Apply": "Yes",
         "Does not apply": "No"
     }
+
     def fixValue(value):
         try:
             return replacements[value]
@@ -55,7 +63,7 @@ def getMergedCodebook(raw: pd.DataFrame)-> Dict[str,Dict[str,str]]:
 
     for idx,r in raw.iterrows():
         vname = r["Variablename"]
-        vname = fixedVname(vname)
+        #vname = fixedVname(vname)
 
         try:
             v = yaml.safe_load(r["Alternatives"])

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<table>
+   {% for v in variables %}
+   <tr>
+      <td>
+         <a href="/var/{{ v.name }}">{{ v.name }}</a>
+      </td>
+      <td>
+         {{ v.description[:25] }}...
+      </td>
+   </tr>
+   {% endfor %}
+</table>
+{% endblock %}

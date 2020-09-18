@@ -15,6 +15,9 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
+def connect():
+    return eng.connect()
+
 class Variable(Base):
     """
     A variable, associating values with mappings and a description

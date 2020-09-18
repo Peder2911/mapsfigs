@@ -6,3 +6,4 @@ data/*
 !*manifest
 *.py[cod]
 __pycache__/
+.konchrc
