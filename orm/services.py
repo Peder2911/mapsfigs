@@ -9,10 +9,23 @@ def getvar(vname,connection):
     return pd.read_sql(f"SELECT {sqlcol(vname)} FROM data",connection)
 
 def withmeta(series,session):
-    vname = series.name
-    var = session.query(Variable).filter(Variable.name == vname).first()
-    mappings = {mp.key:mp.value for mp in var.mappings}
-    return series.apply(lambda x: mappings.get(x))
+    mappings = getdict(series.name,session)
+    series = (series
+            .apply(lambda x: mappings.get(x))
+            .astype("category")
+        )
+    
+    revmap = {v:k for k,v in mappings.items()}
+
+    levels = list(mappings.values())
+    levels.sort(key = lambda lvl: revmap[lvl]) 
+    series.levels = levels 
+
+    return series 
+
+def getdict(variable,session):
+    var = session.query(Variable).filter(Variable.name == variable).first()
+    return {mp.key:mp.value for mp in var.mappings}
 
 def getdescr(vname,session):
     return session.query(Variable).filter(Variable.name == vname).first().description

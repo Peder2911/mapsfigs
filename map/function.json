@@ -1,5 +1,5 @@
 {
-  "scriptFile": "crud.py",
+  "scriptFile": "map.py",
   "bindings": [
     {
       "authLevel": "anonymous",
@@ -10,7 +10,7 @@
         "get",
         "post"
       ],
-     "route":"var/{action}/{vname}"
+     "route":"map/{vname}"
     },
     {
       "type": "http",
