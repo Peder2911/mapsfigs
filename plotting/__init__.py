@@ -14,5 +14,6 @@ def plotbytes(fn):
     return inner
 
 
-calcwidth = lambda series: max(6,2 * len(series.unique()))
-wrapped = lambda labels: ["\n".join(textwrap.wrap(lbl,20)) for lbl in labels]
+calcwidth = lambda series: max(6,2.2 * len(series.unique()))
+wrap = lambda label: "\n".join(textwrap.wrap(label,16))
+wrapped = lambda labels: [wrap(lbl) for lbl in labels]

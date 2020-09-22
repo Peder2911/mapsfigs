@@ -45,7 +45,7 @@ def countplot(data,v1,v2,keepna,pst=False):
             dicts[v] = getdict(v,sess)
 
     if not keepna:
-        rmna = lambda d: {k:v for k,v in d.items() if k > 0}
+        rmna = lambda d: {k:v for k,v in d.items() if k >= 0}
         dicts = {k:rmna(v) for k,v in dicts.items()}
 
     fig,ax = plt.subplots()
@@ -65,7 +65,7 @@ def countplot(data,v1,v2,keepna,pst=False):
 
     width = calcwidth(data[v1])
     fig.set_size_inches(width,6)
-    plt.subplots_adjust(right=1-(2/width))
+    plt.subplots_adjust(right=1-(2/width),bottom=0.15)
 
 def meanplot(data,v1,v2,keepna):
     if not keepna:
@@ -104,7 +104,7 @@ def comp(data,v1,v2,agg = "count",keepna=False):
 
 def main(req: func.HttpRequest):
     try:
-        v1,v2 = req.route_params["variables"].split("_")
+        v1,v2 = req.route_params["variables"].split("-")
     except ValueError:
         return func.HttpResponse(status_code=404)
 
