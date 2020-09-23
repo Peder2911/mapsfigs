@@ -1,21 +1,15 @@
 
+import os
+
 from sqlalchemy import Column,String,Integer,ForeignKey
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker,relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import event
 
-eng = create_engine("postgresql://maps:maps@0.0.0.0/maps")
+eng = create_engine(os.getenv("DB_URI"))
 sm = sessionmaker(bind=eng)
 Base = declarative_base(bind=eng)
-
-"""
-@event.listens_for(eng,"connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    cursor = dbapi_connection.cursor()
-    cursor.execute("PRAGMA foreign_keys=ON")
-    cursor.close()
-    """
 
 def connect():
     return eng.connect()
