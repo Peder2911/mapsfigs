@@ -91,18 +91,23 @@ def meanplot(data,v1,v2,keepna):
     ax.set_xticklabels(wrapped(vdict.values()))
     fig.set_size_inches(calcwidth(data[v1]),6)
 
-@plotbytes
-def comp(data,v1,v2,agg = "count",keepna=False):
-    try:
-        fn = plotfn(agg)
-    except KeyError:
-        return func.HttpResponse(status_code=400)
-    else:
-        fn(data,v1,v2,keepna)
-    plt.xlabel("")
-    plt.ylabel("")
 
 def main(req: func.HttpRequest):
+    try:
+        format = req.params["fmt"]
+    except KeyError:
+        format = "png"
+
+    @plotbytes(format=format)
+    def comp(data,v1,v2,agg = "count",keepna=False):
+        try:
+            fn = plotfn(agg)
+        except KeyError:
+            return func.HttpResponse(status_code=400)
+        else:
+            fn(data,v1,v2,keepna)
+        plt.xlabel("")
+        plt.ylabel("")
     try:
         v1,v2 = req.route_params["variables"].split("-")
     except ValueError:
@@ -120,5 +125,7 @@ def main(req: func.HttpRequest):
         agg = req.params["agg"]
     except KeyError:
         agg = "count"
+    
+    bytes,mimetype = comp(df,v1,v2,agg=agg,keepna=keepna)
 
-    return func.HttpResponse(comp(df,v1,v2,agg=agg,keepna=keepna),mimetype="image/png")
+    return func.HttpResponse(bytes,mimetype=mimetype)

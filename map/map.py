@@ -24,17 +24,23 @@ from __app__.orm.services import withmeta,getvar,getdescr,getdict # pylint: disa
 from __app__.util import sanitizeVarname # pylint: disable=import-error
 
 
-@plotbytes
-def plot_map(geodata,scalemin,scalemax):
-    geodata = geodata.to_crs(epsg=3857)
-    fig,ax = plt.subplots()
-    geodata.plot(column = "var",ax=ax,alpha=0.8,
-            legend=True,vmin=scalemin,vmax=scalemax)
-    contextily.add_basemap(ax,
-            source=contextily.providers.Stamen.TonerLite)
-    fig.set_size_inches((6.5,8))
 
 def main(req: func.HttpRequest):
+    try:
+        format = req.params["fmt"]
+    except KeyError:
+        format = "png"
+
+    @plotbytes(format=format)
+    def plot_map(geodata,scalemin,scalemax):
+        geodata = geodata.to_crs(epsg=3857)
+        fig,ax = plt.subplots()
+        geodata.plot(column = "var",ax=ax,alpha=0.8,
+                legend=True,vmin=scalemin,vmax=scalemax)
+        contextily.add_basemap(ax,
+                source=contextily.providers.Stamen.TonerLite)
+        fig.set_size_inches((6.5,8))
+
     vname = req.route_params["vname"]
     with contextlib.closing(connect()) as con:
         san = sanitizeVarname(vname)
@@ -67,7 +73,5 @@ def main(req: func.HttpRequest):
         data = base.groupby("pdet").mean() 
 
     geodata = geodata.merge(data,on="pdet")
-
-    picbytes = plot_map(geodata,scalemin,scalemax)
-
-    return func.HttpResponse(picbytes,mimetype="image/png")
+    picbytes,mimetype = plot_map(geodata,scalemin,scalemax)
+    return func.HttpResponse(picbytes,mimetype=mimetype)
