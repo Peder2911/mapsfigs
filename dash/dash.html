@@ -1,0 +1,233 @@
+
+<html>
+   <head>
+      <style>
+         html,body {
+            padding: 0px;
+            margin: 0px;
+         }
+
+         body {
+            background: #a0a0a0;
+         }
+
+         select,input {
+            height: 30px;
+         }
+
+         #app {
+            display: grid;
+            grid-template-columns: 250px 720px;
+         }
+         #container {
+            display: grid;
+            justify-items: center;
+            margin-top: 50px;
+            width: 100%;
+         }
+
+         #controlpanel {
+            display: grid;
+            align-content: start;
+            justify-items: center;
+            background: #e0e0e0;
+            padding-bottom: 25px;
+            border-top-left-radius: 15px;
+         }
+
+         #controlpanel>*{
+            width: 200px;
+            margin-top: 15px;
+         }
+
+         .controlcontainer>*{
+            margin: 0px;
+            padding: 0px;
+         }
+
+         .controlcontainer>.label{
+            font-size: large;
+            color: #a0a0a0;
+         }
+
+         .controlcontainer>select {
+            width: 100%;
+         }
+
+         #controlpanel>p{
+            height: auto;
+            margin-bottom: 0px;
+         }
+
+         #controlpanel>hr{
+            width: 200px;
+            margin-top: 25px;
+            height: 0px;
+         }
+
+         #viewport {
+            display: grid;
+            justify-items: center;
+            background: white;
+         }
+         #errormsg {
+            display: grid;
+            place-items: center;
+            background: white;
+         }
+
+         #viewport>img {
+            padding: 10px,10px;
+            max-width: 100%;
+         }
+
+         .button {
+            height: 28px;
+            background: #f0fafa;
+            text-align: center;
+            border: 1px solid gray;
+            text-decoration: inherit;
+            color: inherit;
+            padding-top: 6px;
+         }
+
+      </style>
+   </head>
+   <body>
+      <div id="container">
+         <div id="app">
+            <div id="controlpanel">
+
+               <div class="controlcontainer" id="v1selectContainer">
+                  <p class="label">Plot type</p>
+                  <select id="plottype" name="plottype">
+                     {% for plt in plottypes %}
+                        <option value="{{json.dumps(plt)}}">{{plt.name}}</option>
+                     {% endfor %}
+                  </select>
+               </div>
+
+               <div class="controlcontainer" id="v1selectContainer">
+                  <p class="label">Plot description</p>
+                  <p id="description"></p>
+               </div>
+
+               <div class="controlcontainer" id="v1selectContainer">
+                  <p class="label">Variable 1</p>
+                  <select id="v1select" name="v1select">
+                     {% for v in variables %}
+                        <option value="{{v.name.lower()}}">{{v.name}}</option>
+                     {% endfor %}
+                  </select>
+               </div>
+
+               <div class="controlcontainer" id="v1selectContainer">
+                  <p class="label">Variable 2</p>
+                  <select id="v2select" name="v2select">
+                     {% for v in variables %}
+                        <option value="{{v.name.lower()}}">{{v.name}}</option>
+                     {% endfor %}
+                  </select>
+               </div>
+
+               <div class="controlcontainer" id="paramEntryContainer">
+                  <p class="label">Parameter value</p>
+                  <input type="text" id="paramEntry"></input>
+               </div>
+
+               <hr>
+
+               <div class="controlcontainer" id="paramEntryContainer">
+                  <p class="label">Download format</p>
+                  <select id="format" name="format">
+                     {% for fmt in formats %}
+                        <option value="{{fmt.ext}}">{{fmt.name}}</option>
+                     {% endfor %}
+                  </select>
+               </div>
+
+               <a href="" id="downloadlink" class="button" download>Download plot  📥</a>
+            </div>
+            <div id="viewport">
+               <img id="view" src="" alt="">
+            </div>
+            <div id="errormsg">
+               <p>Something went wrong!</p>
+            </div>
+         </div>
+      </div>
+      <script>
+         const format = (str,v1,v2)=>{
+            str = str.replace(/%s/,v1)
+            if(v2){
+               str = str.replace(/%s/,v2)
+            }
+            return str
+         }
+
+         const update = (e)=>{
+
+            let first = document.getElementById("v1select")
+            let v1select = document.getElementById("v1select")
+            let v2select = document.getElementById("v2select")
+            let paramEntry = document.getElementById("paramEntry")
+            let errmsg = document.getElementById("errormsg")
+
+            document.getElementById("viewport").style.display="grid"
+            errmsg.style.display = "none"
+
+            paramEntry.parentNode.style.display = "none"
+            v2select.parentNode.style.display = "none"
+
+            let plottype = JSON.parse(document.getElementById("plottype").value)
+            document.getElementById("description").innerHTML = plottype.description
+
+            let second = {value: undefined} 
+
+            if(plottype.needs.includes("v2")){
+               v2select.parentNode.style.display = "block"
+               second = v2select
+            } else {
+               if(plottype.needs.includes("param")){
+                  paramEntry.parentNode.style.display = "block"
+                  second = paramEntry 
+               } else {
+               }
+            }
+
+            if(first.value === second.value){
+               errmsg.style.display="grid"
+               document.getElementById("viewport").style.display="none"
+               return 
+            } 
+            if(second.value === ""){
+               errmsg.style.display="grid"
+               document.getElementById("viewport").style.display="none"
+               return 
+            } 
+
+            let tgt = format(
+                  plottype.path,
+                  first.value,
+                  second.value
+               )
+
+            document.getElementById("view").src = tgt
+            let qjoiner = "?"
+            if(tgt.includes("?")){
+               qjoiner = "&"
+            }
+            tgt = tgt + qjoiner +  "fmt=" + document.getElementById("format").value
+            console.log(document.getElementById("format").value)
+            document.getElementById("downloadlink").href = tgt
+         }
+         let selectors = ["v1select","v2select","paramEntry","plottype","format"].map((id)=>{
+            return document.getElementById(id)
+         })
+         selectors.forEach((s)=>{
+            s.onchange = update
+         })
+         update()
+      </script>
+   </body>
+</html>
