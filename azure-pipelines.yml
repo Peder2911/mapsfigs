@@ -43,12 +43,11 @@ stages:
       inputs:
         versionSpec: 3.6 # Functions V2 supports Python 3.6 as of today
 
-    - bash: |
-        python -m venv worker_venv
-        source worker_venv/bin/activate
-        pip install -r requirements.txt
-      workingDirectory: $(workingDirectory)
-      displayName: 'Install application dependencies'
+    - script: pip3.6 install --upgrade pip setuptools wheel
+      displayName: "Install package tooling"
+
+    - script: pip3.6 install --target=$(pwd)/.python_packages/lib/site-packages -r requirements.txt
+      displayName: "Install requirements"
 
     - task: ArchiveFiles@2
       displayName: 'Archive files'
