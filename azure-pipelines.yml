@@ -43,10 +43,10 @@ stages:
       inputs:
         versionSpec: 3.6 # Functions V2 supports Python 3.6 as of today
 
-    - script: pip3.6 install --upgrade pip setuptools wheel
+    - script: pip3.6 install --upgrade setuptools wheel
       displayName: "Install package tooling"
 
-    - script: pip3.6 install --target=$(pwd)/.python_packages/lib/site-packages -r requirements.txt
+    - script: pip3.6 install --target=$(workingDirectory)/.python_packages/lib/site-packages -r requirements.txt
       displayName: "Install requirements"
 
     - task: ArchiveFiles@2
