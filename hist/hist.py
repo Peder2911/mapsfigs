@@ -30,6 +30,8 @@ def main(req: func.HttpRequest):
 
         with closing(get_session()) as sess:
             vdict = getdict(variable,sess)
+            description = getdescr(variable,sess)
+
         data = data[variable].value_counts().reset_index()
         data[variable] = (data[variable] / data[variable].sum())
 
@@ -48,7 +50,7 @@ def main(req: func.HttpRequest):
         
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
 
-        #plt.title("\n".join(textwrap.wrap(description,60)))
+        plt.title("\n".join(textwrap.wrap(description,60)))
         plt.xlabel("")
         plt.ylabel("")
         plt.subplots_adjust(top=0.85,bottom=0.15)

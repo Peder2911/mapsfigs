@@ -31,4 +31,5 @@ def plotbytes(format="png"):
 
 calcwidth = lambda series: max(6,2.2 * len(series.unique()))
 wrap = lambda label: "\n".join(textwrap.wrap(label,16))
+nlines = lambda string: len(string.split("\n"))
 wrapped = lambda labels: [wrap(lbl) for lbl in labels]

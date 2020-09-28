@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import PercentFormatter 
 
 from __app__.plotting import plotbytes,calcwidth,wrapped # pylint: disable=import-error
+from __app__.plotting.text import nlwrap # pylint: disable=import-error
 from __app__.orm import get_session,connect # pylint: disable=import-error
 from __app__.orm.services import withmeta,getvar,getdescr,getdict # pylint: disable=import-error
 
@@ -44,6 +45,8 @@ def countplot(data,v1,v2,keepna,pst=False):
             data[v] = withmeta(data[v],sess)
             dicts[v] = getdict(v,sess)
 
+        v1d,v2d = (getdescr(v,sess) for v in (v1,v2))
+
     if not keepna:
         rmna = lambda d: {k:v for k,v in d.items() if k >= 0}
         dicts = {k:rmna(v) for k,v in dicts.items()}
@@ -61,11 +64,18 @@ def countplot(data,v1,v2,keepna,pst=False):
     if pst:
         ax.yaxis.set_major_formatter(PercentFormatter(1.0))
 
-    plt.legend(title="",frameon = False,loc=2,bbox_to_anchor=(1.,1))
+    plt.title(nlwrap(v1d,50))
+
+    legend = plt.legend(title=nlwrap(v2d,20),frameon = False,loc=2,bbox_to_anchor=(1.,1))
+    ttl = legend.get_title()
+    ttl.set_multialignment("center")
+
+    for txt in legend.get_texts():
+        txt.set_text(nlwrap(txt.get_text(),15))
 
     width = calcwidth(data[v1])
     fig.set_size_inches(width,6)
-    plt.subplots_adjust(right=1-(2/width),bottom=0.15)
+    plt.subplots_adjust(right=0.7,bottom=0.15)
 
 def meanplot(data,v1,v2,keepna):
     if not keepna:
@@ -75,6 +85,9 @@ def meanplot(data,v1,v2,keepna):
     with closing(get_session()) as sess:
         data[v1] = withmeta(data[v1],sess)
         vdict = getdict(v1,sess)
+        v1d,v2d = (getdescr(v,sess) for v in (v1,v2))
+
+    minval,maxval = data[v2].min(),data[v2].max()
 
     if not keepna:
         vdict = {k:v for k,v in vdict.items() if k > 0}
@@ -90,7 +103,10 @@ def meanplot(data,v1,v2,keepna):
 
     ax.set_xticklabels(wrapped(vdict.values()))
     fig.set_size_inches(calcwidth(data[v1]),6)
-
+    fig.subplots_adjust(left=0.20)
+    fig.text(0.06,0.5,nlwrap(v2d+" (mean)",25),rotation="vertical",va="center",ha="center")
+    plt.title(v1d)
+    plt.ylim(minval,maxval)
 
 def main(req: func.HttpRequest):
     try:
