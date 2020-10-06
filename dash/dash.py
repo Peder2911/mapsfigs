@@ -25,9 +25,14 @@ def main(req:func.HttpRequest)->func.HttpResponse:
                 "path":"comp/%s-%s?agg=mean","needs":["v1","v2"]},
 
             {"name":"Comparison percentages",
+                "description": "Show percentage distribution for values of "
+                               "variable 2 distributed over values of variable 1.",
+                "path":"comp/%s-%s?agg=pst","needs":["v1","v2"]},
+
+            {"name":"Group comp. percentages",
                 "description": "Show percentage distribution of unique values of "
                                "variable 2 for each unique value of variable 1.",
-                "path":"comp/%s-%s?agg=pst","needs":["v1","v2"]},
+                "path":"comp/%s-%s?agg=grppst","needs":["v1","v2"]},
 
             {"name":"Comparison counts",
                 "description": "Show count distribution of unique values of "

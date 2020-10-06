@@ -23,18 +23,20 @@ def plotfn(name):
     FUNCTIONS ={
             "count": countplot,
             "mean": meanplot,
-            "pst": pstplot 
+            "pst": lambda *args,**kwargs: countplot(*args,**kwargs,pst=True),
+            "grppst": lambda *args,**kwargs: countplot(*args,**kwargs,pst=True,incat=True)
         }
-
     return FUNCTIONS[name]
 
-def pstplot(*args,**kwargs):
-    countplot(*args,**kwargs,pst=True)
-
-def countplot(data,v1,v2,keepna,pst=False):
+def countplot(data,v1,v2,keepna,pst=False,incat=False):
     data = data.groupby(v1)[v2].value_counts()
+
     if pst:
-        data = data.groupby(level=0).apply(lambda x: (x / x.sum()))
+        if incat:
+            data = data.groupby(level=0).apply(lambda x: (x / x.sum()))
+        else:
+            tot_n = data.sum()
+            data = data.groupby(level=0).apply(lambda x: (x / tot_n))
 
     data.name = "count" 
     data = data.reset_index()
