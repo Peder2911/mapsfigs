@@ -6,15 +6,17 @@ import os
 import io
 import textwrap
 
-from matplotlib import pyplot as plt
 import azure.functions as func 
+
+from matplotlib import pyplot as plt
 import matplotlib.ticker as mtick
 import seaborn as sns
+
+from sqlalchemy.exc import ProgrammingError
 
 from __app__.plotting import plotbytes,calcwidth,wrapped,wrap # pylint: disable=import-error
 from __app__.orm import get_session,connect # pylint: disable=import-error
 from __app__.orm.services import withmeta,getvar,getdescr,getdict # pylint: disable=import-error
-
 
 
 def main(req: func.HttpRequest):
@@ -23,8 +25,22 @@ def main(req: func.HttpRequest):
     except KeyError:
         format = "png"
 
+    vname = req.route_params["vname"]
+
+    with contextlib.closing(connect()) as con:
+        try:
+            df = getvar(vname,con)
+        except ProgrammingError: 
+            return func.HttpResponse(status_code=404)
+
+    with contextlib.closing(get_session()) as sess:
+        df[vname] = withmeta(df[vname],sess)
+
     @plotbytes(format=format)
     def plot_hist(data,variable=None,keepna=False):
+        """
+        Plotting function.
+        """
         if not variable:
             variable = data.columns[0]
 
@@ -55,13 +71,6 @@ def main(req: func.HttpRequest):
         plt.ylabel("")
         plt.subplots_adjust(top=0.85,bottom=0.15)
         fig.set_size_inches(calcwidth(data[variable]),6)
-
-    vname = req.route_params["vname"]
-
-    with contextlib.closing(connect()) as con:
-        df = getvar(vname,con)
-    with contextlib.closing(get_session()) as sess:
-        df[vname] = withmeta(df[vname],sess)
 
     try:
         picbytes,mimetype = plot_hist(df)
