@@ -28,8 +28,10 @@ def plotfn(name):
         }
     return FUNCTIONS[name]
 
-def countplot(data,v1,v2,keepna,pst=False,incat=False):
+def countplot(data,v1,v2,keepna,floor,pst=False,incat=False):
+
     data = data.groupby(v1)[v2].value_counts()
+    data = data[data > floor]
 
     if pst:
         if incat:
@@ -52,6 +54,8 @@ def countplot(data,v1,v2,keepna,pst=False,incat=False):
     if not keepna:
         rmna = lambda d: {k:v for k,v in d.items() if k >= 0}
         dicts = {k:rmna(v) for k,v in dicts.items()}
+
+    dicts[v1] = {k:v for k,v in dicts[v1].items() if v in data[v1].values}
 
     fig,ax = plt.subplots()
     sns.barplot(
@@ -79,7 +83,7 @@ def countplot(data,v1,v2,keepna,pst=False,incat=False):
     fig.set_size_inches(width,6)
     plt.subplots_adjust(right=0.7,bottom=0.15)
 
-def meanplot(data,v1,v2,keepna):
+def meanplot(data,v1,v2,keepna,floor):
     if not keepna:
         for v in v1,v2:
             data = data[data[v] > 0]
@@ -116,14 +120,19 @@ def main(req: func.HttpRequest):
     except KeyError:
         format = "png"
 
+    try:
+        floor = int(req.params["floor"])
+    except KeyError:
+        floor = 0
+
     @plotbytes(format=format)
-    def comp(data,v1,v2,agg = "count",keepna=False):
+    def comp(data,v1,v2,floor=0,agg = "count",keepna=False):
         try:
             fn = plotfn(agg)
         except KeyError:
             return func.HttpResponse(status_code=400)
         else:
-            fn(data,v1,v2,keepna)
+            fn(data,v1,v2,keepna,floor=floor)
         plt.xlabel("")
         plt.ylabel("")
     try:
@@ -144,6 +153,6 @@ def main(req: func.HttpRequest):
     except KeyError:
         agg = "count"
     
-    bytes,mimetype = comp(df,v1,v2,agg=agg,keepna=keepna)
+    bytes,mimetype = comp(df,v1,v2,agg=agg,keepna=keepna,floor=floor)
 
     return func.HttpResponse(bytes,mimetype=mimetype)
