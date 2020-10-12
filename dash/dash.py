@@ -28,18 +28,24 @@ def main(req:func.HttpRequest)->func.HttpResponse:
 
             {"name":"Comparison percentages",
                 "description": "Show percentage distribution for values of "
-                               "variable 2 distributed over values of variable 1.",
-                "path":"comp/%s-%s?agg=pst","needs":["v1","v2"]},
+                               "variable 2 distributed over values of variable 1."
+                              " Parameter value can be use to 'floor out' categories"
+                              " with fewer than 'n' counts.",
+                "path":"comp/%s-%s?agg=pst&floor=%s","needs":["v1","v2","param"]},
 
             {"name":"Group comp. percentages",
                 "description": "Show percentage distribution of unique values of "
-                               "variable 2 for each unique value of variable 1.",
-                "path":"comp/%s-%s?agg=grppst","needs":["v1","v2"]},
+                               "variable 2 for each unique value of variable 1."
+                              " Parameter value can be use to 'floor out' categories"
+                              " with fewer than 'n' counts.",
+                "path":"comp/%s-%s?agg=grppst&floor=%s","needs":["v1","v2","param"]},
 
             {"name":"Comparison counts",
                 "description": "Show count distribution of unique values of "
-                               "variable 2 for each unique value of variable 1.",
-                "path":"comp/%s-%s?agg=count","needs":["v1","v2"]},
+                               "variable 2 for each unique value of variable 1."
+                              " Parameter value can be use to 'floor out' categories"
+                              " with fewer than 'n' counts.",
+                "path":"comp/%s-%s?agg=count&floor=%s","needs":["v1","v2","param"]},
 
             {"name":"Map mean",
                 "description": "Show map of means of variable 1",
