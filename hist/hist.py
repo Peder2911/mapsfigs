@@ -25,6 +25,11 @@ def main(req: func.HttpRequest):
     except KeyError:
         format = "png"
 
+    try:
+        floor = int(req.params["floor"])
+    except KeyError:
+        floor = 0 
+
     vname = req.route_params["vname"]
 
     with contextlib.closing(connect()) as con:
@@ -33,11 +38,13 @@ def main(req: func.HttpRequest):
         except ProgrammingError: 
             return func.HttpResponse(status_code=404)
 
+    vname = req.route_params["vname"]
+
     with contextlib.closing(get_session()) as sess:
         df[vname] = withmeta(df[vname],sess)
 
     @plotbytes(format=format)
-    def plot_hist(data,variable=None,keepna=False):
+    def plot_hist(data,variable=None,keepna=False,floor=0):
         """
         Plotting function.
         """
@@ -49,12 +56,16 @@ def main(req: func.HttpRequest):
             description = getdescr(variable,sess)
 
         data = data[variable].value_counts().reset_index()
+        data = data[data[variable]>floor]
         data[variable] = (data[variable] / data[variable].sum())
 
+        vdict = {k:v for k,v in vdict.items() if v in data["index"].values}
         data["index"] = data["index"].apply(wrap)
         vdict = {k:wrap(v) for k,v in vdict.items()}
+
         if not keepna:
             vdict = {k:v for k,v in vdict.items() if k>=0}
+
 
         fig,ax = plt.subplots()
         sns.barplot(
@@ -73,7 +84,7 @@ def main(req: func.HttpRequest):
         fig.set_size_inches(calcwidth(data[variable]),6)
 
     try:
-        picbytes,mimetype = plot_hist(df)
+        picbytes,mimetype = plot_hist(df,floor=floor)
     except NotImplementedError:
         return func.HttpResponse(status_code=400)
 

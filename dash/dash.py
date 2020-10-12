@@ -17,8 +17,10 @@ def main(req:func.HttpRequest)->func.HttpResponse:
 
     plottypes = [
             {"name":"Histogram",
-                "description":"A simple histogram of unique values of variable 1.",
-                "path":"hist/%s","needs":["v1"]},
+                "description":"A simple histogram of unique values of variable 1."
+                              " Parameter value can be use to 'floor out' categories"
+                              " with fewer than 'n' counts.",
+                "path":"hist/%s?floor=%s","needs":["v1","param"]},
 
             {"name":"Comparison means",
                 "description": "Show means of variable 2 for unique values of variable 1.",
